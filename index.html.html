@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>제3대항전술대대 행정 시스템</title>
+    <style>
+        :root {
+            --bg-color: #f0f4f9;
+            --card-bg: #ffffff;
+            --primary-blue: #1e40af;
+            --accent-blue: #2563eb;
+            --light-blue: #eff6ff;
+            --soft-border: rgba(59, 130, 246, 0.25);
+            --text-dark: #1e293b;
+            --text-gray: #64748b;
+            --status-active: #10b981;
+            --shadow-subtle: 0 4px 15px rgba(0, 0, 0, 0.03);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-dark); min-height: 100vh; display: flex; flex-direction: column; }
+
+        navbar { background: #ffffff; border-bottom: 2px solid var(--soft-border); padding: 12px 36px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .brand-logo { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 20px; color: var(--primary-blue); }
+        .brand-logo img { height: 38px; width: auto; border-radius: 6px; }
+
+        .nav-links { display: flex; gap: 8px; list-style: none; }
+        .nav-link { padding: 10px 20px; border-radius: 8px; font-size: 15px; font-weight: 700; color: var(--text-gray); cursor: pointer; transition: 0.2s; }
+        .nav-link:hover { color: var(--primary-blue); background: var(--light-blue); }
+        .nav-link.active { background: var(--accent-blue); color: #ffffff; }
+
+        .main-container { max-width: 1500px; margin: 28px auto; padding: 0 24px; width: 100%; flex: 1; }
+        .page { display: none; }
+        .page.active { display: block; }
+
+        .card { background: var(--card-bg); border: 1px solid var(--soft-border); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-subtle); }
+        .card-header-title { font-size: 18px; font-weight: 800; color: var(--primary-blue); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--light-blue); display: flex; justify-content: space-between; }
+
+        .home-grid-2col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+        .company-layout-3col { display: grid; grid-template-columns: 1fr 280px; gap: 24px; align-items: start; }
+
+        .widget-panel { display: flex; flex-direction: column; gap: 16px; }
+        .side-widget { background: #ffffff; border: 1px solid var(--soft-border); border-radius: 14px; padding: 18px; text-align: center; }
+        .widget-label { font-size: 13px; font-weight: 700; color: var(--text-gray); margin-bottom: 6px; }
+        .widget-value { font-size: 22px; font-weight: 800; color: var(--primary-blue); }
+
+        .search-box { width: 100%; padding: 14px 20px; border-radius: 12px; border: 1px solid var(--soft-border); font-size: 15px; margin-bottom: 20px; outline: none; }
+        .section-capsule { display: inline-block; background: var(--light-blue); color: var(--primary-blue); border: 1px solid var(--soft-border); padding: 6px 16px; border-radius: 20px; font-weight: 800; font-size: 14px; margin-bottom: 16px; }
+
+        .member-table, .summary-table, .dcms-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: center; }
+        .member-table th, .member-table td, .summary-table th, .summary-table td { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; }
+        .member-table th, .summary-table th { background-color: var(--light-blue); color: var(--primary-blue); font-weight: 800; }
+        .member-table td.rank { font-weight: 800; color: var(--accent-blue); }
+        .member-table td.name { font-weight: 800; color: var(--text-dark); }
+        .status-badge { color: var(--status-active); font-weight: 800; font-size: 13px; background: rgba(16, 185, 129, 0.1); padding: 4px 10px; border-radius: 12px; display: inline-block; }
+
+        .summary-table td.text-left { text-align: left; font-weight: 700; }
+        .summary-table td.highlight { font-weight: 800; color: var(--accent-blue); }
+
+        .dcms-table th, .dcms-table td { border: 1px solid #cbd5e1; padding: 10px 8px; }
+        .dcms-table thead th { background-color: var(--primary-blue); color: #ffffff; font-weight: 800; }
+        .dcms-table .sub-header th { background-color: #3b82f6; color: #ffffff; font-size: 13px; }
+        .dcms-table .day-header-in { background-color: #60a5fa !important; color: #ffffff; }
+        .dcms-table .day-header-out { background-color: #f87171 !important; color: #ffffff; }
+        .dcms-table .summary-bg { background-color: #dbeafe; font-weight: 800; color: var(--primary-blue); }
+        .dcms-table .total-row td { background-color: #bfdbfe; font-weight: 900; color: var(--primary-blue); }
+
+        .goal-box { background: #ffffff; border: 1px dashed var(--soft-border); border-radius: 12px; padding: 20px; min-height: 90px; font-size: 14px; color: var(--text-gray); display: flex; align-items: center; justify-content: center; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <navbar>
+        <div class="brand-logo">
+            <img src="https://i.ibb.co/cXYn0Sh7/3rd-division-logo.png" alt="부대로고" onerror="this.onerror=null; this.src='https://ibb.co/cXYn0Sh7';">
+            <span>제3대항전술대대 행정 시스템</span>
+        </div>
+        <ul class="nav-links">
+            <li class="nav-link active" onclick="switchPage('home')">홈페이지</li>
+            <li class="nav-link" onclick="switchPage('company5')">5중대 현황</li>
+            <li class="nav-link" onclick="switchPage('company6')">6중대 현황</li>
+            <li class="nav-link" onclick="switchPage('dcms')">대대 통합 현황</li>
+        </ul>
+    </navbar>
+
+    <div class="main-container">
+
+        <!-- PAGE 1: HOME -->
+        <div id="page-home" class="page active">
+            <div class="home-grid-2col" style="margin-bottom: 24px;">
+                <div class="card" style="margin-bottom: 0;">
+                    <div class="card-header-title">제5필사중대 행정 요약</div>
+                    <table class="summary-table">
+                        <thead><tr><th>구분</th><th>인원</th></tr></thead>
+                        <tbody id="summary-5c-body">
+                            <tr><td class="text-left">신규 전입자</td><td class="highlight" id="s5-new">0 명</td></tr>
+                            <tr><td class="text-left">전역자</td><td class="highlight" id="s5-retired">0 명</td></tr>
+                            <tr><td class="text-left">무단이탈자</td><td class="highlight" id="s5-deserter">0 명</td></tr>
+                            <tr><td class="text-left">전출 (3rd ID ➔ 타부대)</td><td class="highlight" id="s5-out">0 명</td></tr>
+                            <tr><td class="text-left">전입 (타부대 ➔ 3rd ID)</td><td class="highlight" id="s5-in">0 명</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card" style="margin-bottom: 0;">
+                    <div class="card-header-title">제6철혈중대 행정 요약</div>
+                    <table class="summary-table">
+                        <thead><tr><th>구분</th><th>인원</th></tr></thead>
+                        <tbody id="summary-6c-body">
+                            <tr><td class="text-left">신규 전입자</td><td class="highlight" id="s6-new">0 명</td></tr>
+                            <tr><td class="text-left">전역자</td><td class="highlight" id="s6-retired">0 명</td></tr>
+                            <tr><td class="text-left">무단이탈자</td><td class="highlight" id="s6-deserter">0 명</td></tr>
+                            <tr><td class="text-left">전출 (3rd ID ➔ 타부대)</td><td class="highlight" id="s6-out">0 명</td></tr>
+                            <tr><td class="text-left">전입 (타부대 ➔ 3rd ID)</td><td class="highlight" id="s6-in">0 명</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 24px;">
+                <div class="card" style="margin-bottom: 0;">
+                    <div class="card-header-title">
+                        <span>📅 대대 정기 회의 일정표</span>
+                        <span style="font-size: 13px; color: var(--accent-blue);">매주 월요일 / 금요일 20:00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-around; align-items: center; padding: 12px 0;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 13px; color: var(--text-gray); font-weight: 700;">다음 회의 예정</div>
+                            <div id="next-meeting-title" style="font-size: 18px; font-weight: 800; color: var(--primary-blue); margin-top: 4px;">--</div>
+                        </div>
+                        <div style="height: 40px; width: 1px; background: var(--soft-border);"></div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 13px; color: var(--text-gray); font-weight: 700;">다음 회의까지 남은 시간</div>
+                            <div id="meeting-countdown" style="font-size: 22px; font-weight: 900; color: var(--accent-blue); margin-top: 4px;">--시간 --분 --초</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="side-widget" style="margin-bottom: 0;">
+                    <div class="widget-label">🕒 KST 표준 시각 및 날짜</div>
+                    <div id="kst-clock" class="widget-value">--:--:--</div>
+                    <div id="kst-date" style="font-size: 13px; font-weight: 700; color: var(--text-gray); margin-top: 6px;">----년 --월 --일 -요일</div>
+                </div>
+            </div>
+
+            <div class="home-grid-2col">
+                <div class="card" style="margin-bottom: 0;">
+                    <div class="card-header-title"><span>🎯 5중대 이번 주 목표</span></div>
+                    <div class="goal-box" id="goal-5c">📌 실시간 연동 중</div>
+                </div>
+                <div class="card" style="margin-bottom: 0;">
+                    <div class="card-header-title"><span>🎯 6중대 이번 주 목표</span></div>
+                    <div class="goal-box" id="goal-6c">📌 실시간 연동 중</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 2: 5TH COMPANY -->
+        <div id="page-company5" class="page">
+            <div class="company-layout-3col">
+                <div>
+                    <input type="text" class="search-box" placeholder="🔍 5중대 검색..." onkeyup="filterAllTables(this, 'page-company5')">
+                    <div class="card">
+                        <div class="section-capsule">🎖️ 5중대 장교</div>
+                        <table class="member-table"><thead><tr><th>계급</th><th>성명</th><th>복무 상태</th></tr></thead><tbody id="table-5c-officer"><tr><td colspan="3">데이터 수신 대기 중</td></tr></tbody></table>
+                    </div>
+                    <div class="card">
+                        <div class="section-capsule">🎖️ 5중대 부사관</div>
+                        <table class="member-table"><thead><tr><th>계급</th><th>성명</th><th>복무 상태</th></tr></thead><tbody id="table-5c-nco"><tr><td colspan="3">데이터 수신 대기 중</td></tr></tbody></table>
+                    </div>
+                    <div class="card">
+                        <div class="section-capsule">🎖️ 5중대 병사</div>
+                        <table class="member-table"><thead><tr><th>계급</th><th>성명</th><th>복무 상태</th></tr></thead><tbody id="table-5c-enlisted"><tr><td colspan="3">데이터 수신 대기 중</td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="widget-panel">
+                    <div class="side-widget"><div class="widget-label">🕒 KST 표준시각</div><div class="clock-sync widget-value">--:--:--</div></div>
+                    <div class="side-widget"><div class="widget-label">🔄 데이터 최신화 시각</div><div class="last-sync-time widget-value" style="font-size: 18px;">--:--:--</div><div style="font-size: 12px; color: var(--text-gray); margin-top: 4px;">● <span class="countdown-sync">5</span>초 주기 실시간 연동됨</div></div>
+                    <div class="side-widget"><div class="widget-label">📊 5중대 누적 실적</div><div class="widget-value" id="stats-5c-total">0 명</div></div>
+                    <div class="side-widget"><div class="widget-label">🏆 5중대 1위</div><div class="widget-value" id="stats-5c-top" style="font-size: 18px;">-</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 3: 6TH COMPANY -->
+        <div id="page-company6" class="page">
+            <div class="company-layout-3col">
+                <div>
+                    <input type="text" class="search-box" placeholder="🔍 6중대 검색..." onkeyup="filterAllTables(this, 'page-company6')">
+                    <div class="card">
+                        <div class="section-capsule">🎖️ 6중대 장교</div>
+                        <table class="member-table"><thead><tr><th>계급</th><th>성명</th><th>복무 상태</th></tr></thead><tbody id="table-6c-officer"><tr><td colspan="3">데이터 수신 대기 중</td></tr></tbody></table>
+                    </div>
+                    <div class="card">
+                        <div class="section-capsule">🎖️ 6중대 부사관</div>
+                        <table class="member-table"><thead><tr><th>계급</th><th>성명</th><th>복무 상태</th></tr></thead><tbody id="table-6c-nco"><tr><td colspan="3">데이터 수신 대기 중</td></tr></tbody></table>
+                    </div>
+                    <div class="card">
+                        <div class="section-capsule">🎖️ 6중대 병사</div>
+                        <table class="member-table"><thead><tr><th>계급</th><th>성명</th><th>복무 상태</th></tr></thead><tbody id="table-6c-enlisted"><tr><td colspan="3">데이터 수신 대기 중</td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="widget-panel">
+                    <div class="side-widget"><div class="widget-label">🕒 KST 표준시각</div><div class="clock-sync widget-value">--:--:--</div></div>
+                    <div class="side-widget"><div class="widget-label">🔄 데이터 최신화 시각</div><div class="last-sync-time widget-value" style="font-size: 18px;">--:--:--</div><div style="font-size: 12px; color: var(--text-gray); margin-top: 4px;">● <span class="countdown-sync">5</span>초 주기 실시간 연동됨</div></div>
+                    <div class="side-widget"><div class="widget-label">📊 6중대 누적 실적</div><div class="widget-value" id="stats-6c-total">0 명</div></div>
+                    <div class="side-widget"><div class="widget-label">🏆 6중대 1위</div><div class="widget-value" id="stats-6c-top" style="font-size: 18px;">-</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 4: DCMS -->
+        <div id="page-dcms" class="page">
+            <div class="card" style="overflow-x: auto;">
+                <h3 style="font-size: 18px; color: var(--primary-blue); margin-bottom: 18px; font-weight: 800;">제3대항전술대대 인원 유/출입 현황 (주/요일별)</h3>
+                <table class="dcms-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="width: 90px;">주 / 요일</th>
+                            <th colspan="2">월요일</th><th colspan="2">화요일</th><th colspan="2">수요일</th><th colspan="2">목요일</th><th colspan="2">금요일</th><th colspan="2">토요일</th><th colspan="2">일요일</th>
+                            <th colspan="2" class="summary-bg">총합</th><th rowspan="2" class="summary-bg" style="width: 80px;">통계<br>증감</th>
+                        </tr>
+                        <tr class="sub-header">
+                            <th class="day-header-in">유입</th><th class="day-header-out">유출</th>
+                            <th class="day-header-in">유입</th><th class="day-header-out">유출</th>
+                            <th class="day-header-in">유입</th><th class="day-header-out">유출</th>
+                            <th class="day-header-in">유입</th><th class="day-header-out">유출</th>
+                            <th class="day-header-in">유입</th><th class="day-header-out">유출</th>
+                            <th class="day-header-in">유입</th><th class="day-header-out">유출</th>
+                            <th class="day-header-in">유입</th><th class="day-header-out">유출</th>
+                            <th class="day-header-in">유입</th><th class="day-header-out">유출</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dcms-weekly-body">
+                        <tr><td style="font-weight:800;">1주차</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="summary-bg">0</td><td class="summary-bg">0</td><td class="summary-bg">-</td></tr>
+                        <tr><td style="font-weight:800;">2주차</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="summary-bg">0</td><td class="summary-bg">0</td><td class="summary-bg">-</td></tr>
+                        <tr><td style="font-weight:800;">3주차</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="summary-bg">0</td><td class="summary-bg">0</td><td class="summary-bg">-</td></tr>
+                        <tr><td style="font-weight:800;">4주차</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="summary-bg">0</td><td class="summary-bg">0</td><td class="summary-bg">-</td></tr>
+                        <tr><td style="font-weight:800;">5주차</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="summary-bg">0</td><td class="summary-bg">0</td><td class="summary-bg">-</td></tr>
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="15" style="text-align: right; padding-right: 20px;">월간총합</td>
+                            <td id="dcms-total-in">0</td><td id="dcms-total-out">0</td><td id="dcms-total-diff">-</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let timeLeft = 5;
+
+        function switchPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+
+            document.getElementById('page-' + pageId).classList.add('active');
+            const pageIndex = { 'home': 0, 'company5': 1, 'company6': 2, 'dcms': 3 };
+            document.querySelectorAll('.nav-link')[pageIndex[pageId]].classList.add('active');
+        }
+
+        function updateClockAndMeeting() {
+            const now = new Date();
+            const timeStr = now.toTimeString().split(' ')[0];
+            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+            const dateStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 ${dayNames[now.getDay()]}요일`;
+
+            const clockEl = document.getElementById('kst-clock');
+            if (clockEl) clockEl.innerText = timeStr;
+
+            const dateEl = document.getElementById('kst-date');
+            if (dateEl) dateEl.innerText = dateStr;
+
+            document.querySelectorAll('.clock-sync').forEach(el => el.innerText = timeStr);
+
+            const currentDay = now.getDay();
+            let nextMeeting = new Date(now);
+            nextMeeting.setHours(20, 0, 0, 0);
+
+            if (currentDay === 1 && now.getHours() < 20) {
+            } else if (currentDay >= 1 && currentDay <= 4) {
+                let daysUntilFriday = (5 - currentDay + 7) % 7;
+                if (daysUntilFriday === 0) daysUntilFriday = 7;
+                nextMeeting.setDate(now.getDate() + daysUntilFriday);
+            } else if (currentDay === 5 && now.getHours() < 20) {
+            } else {
+                let daysUntilMonday = (1 - currentDay + 7) % 7;
+                if (daysUntilMonday === 0) daysUntilMonday = 7;
+                nextMeeting.setDate(now.getDate() + daysUntilMonday);
+            }
+
+            const meetingDayName = dayNames[nextMeeting.getDay()];
+            const meetingTitleEl = document.getElementById('next-meeting-title');
+            if (meetingTitleEl) {
+                meetingTitleEl.innerText = `${nextMeeting.getMonth() + 1}/${nextMeeting.getDate()}(${meetingDayName}) 20:00 회의`;
+            }
+
+            const diffMs = nextMeeting - now;
+            const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            const diffSecs = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+            const countdownEl = document.getElementById('meeting-countdown');
+            if (countdownEl) {
+                countdownEl.innerText = `${diffHrs}시간 ${diffMins}분 ${diffSecs}초`;
+            }
+        }
+
+        async function fetchBotData() {
+            try {
+                const response = await fetch('/api/data');
+                const data = await response.json();
+
+                // 5중대 데이터 업데이트
+                renderTable('table-5c-officer', data.company5.officers);
+                renderTable('table-5c-nco', data.company5.ncos);
+                renderTable('table-5c-enlisted', data.company5.enlisted);
+                document.getElementById('stats-5c-total').innerText = data.company5.total + " 명";
+                document.getElementById('goal-5c').innerText = data.company5.goal;
+
+                document.getElementById('s5-new').innerText = data.summary.c5.new + " 명";
+                document.getElementById('s5-retired').innerText = data.summary.c5.retired + " 명";
+                document.getElementById('s5-deserter').innerText = data.summary.c5.deserter + " 명";
+                document.getElementById('s5-out').innerText = data.summary.c5.out + " 명";
+                document.getElementById('s5-in').innerText = data.summary.c5.in + " 명";
+
+                // 6중대 데이터 업데이트
+                renderTable('table-6c-officer', data.company6.officers);
+                renderTable('table-6c-nco', data.company6.ncos);
+                renderTable('table-6c-enlisted', data.company6.enlisted);
+                document.getElementById('stats-6c-total').innerText = data.company6.total + " 명";
+                document.getElementById('goal-6c').innerText = data.company6.goal;
+
+                document.getElementById('s6-new').innerText = data.summary.c6.new + " 명";
+                document.getElementById('s6-retired').innerText = data.summary.c6.retired + " 명";
+                document.getElementById('s6-deserter').innerText = data.summary.c6.deserter + " 명";
+                document.getElementById('s6-out').innerText = data.summary.c6.out + " 명";
+                document.getElementById('s6-in').innerText = data.summary.c6.in + " 명";
+
+            } catch (e) {
+                console.log("봇 데이터 연동 대기 중...");
+            }
+        }
+
+        function renderTable(elementId, items) {
+            const tbody = document.getElementById(elementId);
+            if (!items || items.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="color: var(--text-gray);">소속 대원이 없습니다.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = items.map(item => `
+                <tr>
+                    <td class="rank">${item.rank}</td>
+                    <td class="name">${item.name}</td>
+                    <td><span class="status-badge">${item.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function filterAllTables(input, pageId) {
+            const query = input.value.toLowerCase();
+            document.querySelectorAll('#' + pageId + ' .member-table tbody tr').forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(query) ? '' : 'none';
+            });
+        }
+
+        setInterval(() => {
+            updateClockAndMeeting();
+            timeLeft--;
+            if (timeLeft < 0) {
+                timeLeft = 5;
+                const now = new Date();
+                document.querySelectorAll('.last-sync-time').forEach(el => el.innerText = now.toTimeString().split(' ')[0]);
+                fetchBotData();
+            }
+            document.querySelectorAll('.countdown-sync').forEach(el => el.innerText = timeLeft);
+        }, 1000);
+
+        updateClockAndMeeting();
+        fetchBotData();
+    </script>
+</body>
+</html>
